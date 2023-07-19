@@ -1,34 +1,17 @@
-name: Build image
-
+name: build-bluefusion
 on:
   schedule:
     - cron: '30 20 * * *'  # 8:30pm everyday
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - 'README*'
-      - '*.md'
-      - '*.png'
-      - '*.txt'
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'README*'
-      - '*.md'
-      - '*.png'
-      - '*.txt'
   workflow_dispatch:
-
+  
 env:
-  IMAGE_NAME: ${{ github.event.repository.name }}
-  GITHUB_USERNAME: ${{ github.repository_owner }}
-  GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    IMAGE_BASE_NAME: bluefusion
+    IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  push-ghcr:
+    name: Build and push image
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
@@ -36,140 +19,154 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        image_name: [silverblue]
         major_version: [37, 38]
         include:
           - major_version: 37
-            is_latest: false
-            is_stable: false
+            is_latest_version: false
+            is_stable_version: true
           - major_version: 38
-            is_latest: true
-            is_stable: true
-
-    steps:
-
-      - name: Checkout repository
+            is_latest_version: true
+            is_stable_version: true
+    steps: 
+      # Checkout push-to-registry action GitHub repository
+      - name: Checkout Push to Registry action
         uses: actions/checkout@v3
 
-      - name: Log into GitHub registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ env.GITHUB_USERNAME }}
-          password: ${{ env.GITHUB_PASSWORD }}
+      - name: Matrix Variables
+        run: |
+          if [[ "${{ matrix.image_name }}" == "lxqt" || "${{ matrix.image_name }}" == "mate" ]]; then
+              echo "SOURCE_IMAGE=base" >> $GITHUB_ENV
+          else
+              echo "SOURCE_IMAGE=${{ matrix.image_name }}" >> $GITHUB_ENV
+          fi
+          echo "IMAGE_NAME=${{env.IMAGE_BASE_NAME}}" >> $GITHUB_ENV
 
-      - name: Extract Docker metadata
+      - name: Generate tags
+        id: generate-tags
+        shell: bash
+        run: |
+          # Generate a timestamp for creating an image version history
+          TIMESTAMP="$(date +%Y%m%d)"
+          MAJOR_VERSION="${{ matrix.major_version }}"
+          COMMIT_TAGS=()
+          BUILD_TAGS=()
+          # Have tags for tracking builds during pull request
+          SHA_SHORT="${GITHUB_SHA::7}"
+          COMMIT_TAGS+=("pr-${{ github.event.number }}-${MAJOR_VERSION}")
+          COMMIT_TAGS+=("${SHA_SHORT}-${MAJOR_VERSION}")
+          if [[ "${{ matrix.is_latest_version }}" == "true" ]] && \
+             [[ "${{ matrix.is_stable_version }}" == "true" ]]; then
+              COMMIT_TAGS+=("pr-${{ github.event.number }}")
+              COMMIT_TAGS+=("${SHA_SHORT}")
+          fi
+
+          BUILD_TAGS=("${MAJOR_VERSION}" "${MAJOR_VERSION}-${TIMESTAMP}")
+
+          if [[ "${{ matrix.is_latest_version }}" == "true" ]] && \
+             [[ "${{ matrix.is_stable_version }}" == "true" ]]; then
+              BUILD_TAGS+=("latest")
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              echo "Generated the following commit tags: "
+              for TAG in "${COMMIT_TAGS[@]}"; do
+                  echo "${TAG}"
+              done
+              alias_tags=("${COMMIT_TAGS[@]}")
+          else
+              alias_tags=("${BUILD_TAGS[@]}")
+          fi
+          echo "Generated the following build tags: "
+          for TAG in "${BUILD_TAGS[@]}"; do
+              echo "${TAG}"
+          done
+          echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
+
+      - name: Get current version
+        id: labels
+        run: |
+          ver=$(skopeo inspect docker://quay.io/fedora-ostree-desktops/${{ env.SOURCE_IMAGE }}:${{ matrix.major_version }} | jq -r '.Labels["org.opencontainers.image.version"]')
+          echo "VERSION=$ver" >> $GITHUB_OUTPUT
+
+      # Build metadata
+      - name: Image Metadata
+        uses: docker/metadata-action@v4
         id: meta
-        uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=semver,pattern={{version}}
-            type=sha,prefix=sha256-
+            ${{ env.IMAGE_NAME }}
+          labels: |
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.version=${{ steps.labels.outputs.VERSION }}
+            org.opencontainers.image.description=A base ${{ env.IMAGE_NAME }} image with batteries included
+            io.artifacthub.package.readme-url=https://raw.githubusercontent.com/ublue-os/main/main/README.md
+            io.artifacthub.package.logo-url=https://avatars.githubusercontent.com/u/120078124?s=200&v=4
 
-      - name: Extract Docker PR tag
-        if: github.event_name == 'pull_request'
-        id: meta_pr
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=ref,suffix=-${{ matrix.major_version }},event=pr
-
-      - name: Extract Docker date tag
-        if: github.event_name == 'schedule'
-        id: meta_date
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=schedule,prefix=${{ matrix.major_version }}-,pattern={{date 'YYYYMMDD'}}
-
-      - name: Extract Docker major version tag
-        if: |
-          github.event_name != 'pull_request' && matrix.major_version != ''
-        id: meta_version
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=raw,value=${{ matrix.major_version }}
-
-      - name: Extract Docker stable tag
-        if: |
-          github.event_name != 'pull_request' && matrix.is_stable == true
-        id: meta_stable
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,value=stable
-
-      - name: Extract Docker latest tag
-        if: |
-          github.event_name != 'pull_request' && matrix.is_latest == true
-        id: meta_latest
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-          tags: |
-            type=raw,value=latest
-
+      # Build image using Buildah action
       - name: Build Image
         id: build_image
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: |
             ./Containerfile.${{ matrix.major_version }}
+          image: ${{ env.IMAGE_NAME }}
           tags: |
-            ${{ steps.meta.outputs.tags }}
-            ${{ steps.meta_pr.outputs.tags }}
-            ${{ steps.meta_date.outputs.tags }}
-            ${{ steps.meta_version.outputs.tags }}
-            ${{ steps.meta_stable.outputs.tags }}
-            ${{ steps.meta_latest.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+            ${{ steps.generate-tags.outputs.alias_tags }}
           build-args: |
+            IMAGE_NAME=${{ matrix.image_name }}
+            SOURCE_IMAGE=${{ env.SOURCE_IMAGE }}
             FEDORA_MAJOR_VERSION=${{ matrix.major_version }}
-          oci: true
+          labels: ${{ steps.meta.outputs.labels }}
+          oci: false
 
-      - name: Push to container registries
+      # Workaround bug where capital letters in your GitHub username make it impossible to push to GHCR.
+      # https://github.com/macbre/push-to-ghcr/issues/12
+      - name: Lowercase Registry
+        id: registry_case
+        uses: ASzc/change-string-case-action@v5
+        with:
+          string: ${{ env.IMAGE_REGISTRY }}
+
+      # Push the image to GHCR (Image Registry)
+      - name: Push To GHCR
         uses: redhat-actions/push-to-registry@v2
         id: push
+        if: github.event_name != 'pull_request'
+        env:
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_PASSWORD: ${{ github.token }}
         with:
+          image: ${{ steps.build_image.outputs.image }}
           tags: ${{ steps.build_image.outputs.tags }}
+          registry: ${{ steps.registry_case.outputs.lowercase }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_PASSWORD }}
           extra-args: |
             --disable-content-trust
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       # Sign container
-      - uses: sigstore/cosign-installer@v2
+      - uses: sigstore/cosign-installer@v3.1.1
+        if: github.event_name != 'pull_request'
 
       - name: Sign container image
+        if: github.event_name != 'pull_request'
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ env.GITHUB_USERNAME }}/${{ env.IMAGE_NAME }}@${TAGS}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ steps.registry_case.outputs.lowercase }}/${{ env.IMAGE_NAME }}@${TAGS}
         env:
           TAGS: ${{ steps.push.outputs.digest }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_KEY }}
           COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
 
       - name: Echo outputs
+        if: github.event_name != 'pull_request'
         run: |
           echo "${{ toJSON(steps.push.outputs) }}"
