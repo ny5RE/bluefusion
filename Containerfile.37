@@ -24,7 +24,7 @@ RUN rpm-ostree install distrobox && \
     --uninstall rpmfusion-nonfree-release && \
 ####    rpm-ostree install intel-media-driver libva-intel-driver && \
     rpm-ostree install nextcloud-client nextcloud-client-nautilus && \
-    rpm-ostree install neofetch && \
+    rpm-ostree install neofetch adw-gtk3-theme raw-thumbnailer && \
     rpm-ostree override remove mesa-va-drivers --install=mesa-va-drivers-freeworld --install=mesa-vdpau-drivers-freeworld && \
     rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
     rpm-ostree install ffmpeg gstreamer1-plugin-libav gstreamer1-plugins-bad-free-extras gstreamer1-plugins-bad-freeworld gstreamer1-plugins-ugly gstreamer1-vaapi steam-devices && \
