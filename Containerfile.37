@@ -36,6 +36,7 @@ RUN rpm-ostree install distrobox && \
     echo "container_image_default=\"registry.fedoraproject.org/fedora-toolbox:$(rpm -E %fedora)\"" >> /etc/distrobox/distrobox.conf && \
     # Setup container signing
     echo "Setup container signing in policy.json and cosign.yaml"
+    echo "Registry to write: $IMAGE_REGISTRY"
     sed -i "s ghcr.io/ny5re $IMAGE_REGISTRY g" /usr/etc/containers/policy.json
     sed -i "s ghcr.io/ny5re $IMAGE_REGISTRY g" /usr/etc/containers/registries.d/cosign.yaml
     rpm-ostree cleanup -m && \
