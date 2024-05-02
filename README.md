@@ -3,6 +3,8 @@
 
 [![build-image](https://github.com/ny5RE/silverfusion/actions/workflows/build.yml/badge.svg)](https://github.com/ny5RE/silverfusion/actions/workflows/build.yml)
 
+> **Note** I am using [this fix](https://universal-blue.discourse.group/t/selinux-workarounds-for-binaries-with-the-wrong-label/342) for libvirt.
+
 A Fedora Silverblue image that adds RPM Fusion with media codecs and replaces
 [Toolbox][2] with [Distrobox][3].
 
