@@ -169,7 +169,7 @@ jobs:
           cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY_URL }}/${{ env.REGISTRY_USERNAME }}/${{ env.IMAGE_NAME }}@${TAGS}
         env:
           TAGS: ${{ steps.push.outputs.digest }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
           COSIGN_EXPERIMENTAL: false
 
       - name: Echo outputs
