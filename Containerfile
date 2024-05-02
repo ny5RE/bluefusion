@@ -20,8 +20,7 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
     rpm-ostree install python3-libguestfs qemu-kvm virt-install virt-manager virt-top virt-viewer && \
 ####      QEMU     ####
 ####     ny5RE     ####
-    rpm-ostree install gnome-tweaks && \
-#    rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules && \
+    rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules && \
     rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
 ####   ny5RE end   ####
     rpm-ostree override remove mesa-va-drivers --install=mesa-va-drivers-freeworld && \
