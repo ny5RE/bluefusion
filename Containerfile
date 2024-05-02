@@ -1,6 +1,6 @@
 ARG FEDORA_MAJOR_VERSION=40
 
-FROM ghcr.io/aguslr/bluevanilla:${FEDORA_MAJOR_VERSION}
+FROM ghcr.io/ny5RE/bluevanilla:${FEDORA_MAJOR_VERSION}
 
 COPY rootfs/ /
 
