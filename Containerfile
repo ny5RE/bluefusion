@@ -22,6 +22,7 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
 ####     ny5RE     ####
     rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules && \
     rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
+    systemctl enable swtpm-workaround.service && \
 ####   ny5RE end   ####
     rpm-ostree override remove mesa-va-drivers --install=mesa-va-drivers-freeworld && \
     rpm-ostree install mesa-vdpau-drivers-freeworld ; \
