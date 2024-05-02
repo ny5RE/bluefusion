@@ -30,8 +30,8 @@ the following command:
         --volume .:/build-container-installer/build \
         --security-opt label=disable --pull=newer \
         ghcr.io/jasonn3/build-container-installer:latest \
-        IMAGE_REPO="ghcr.io/aguslr" \
-        IMAGE_NAME="bluefusion" \
+        IMAGE_REPO="ghcr.io/ny5re" \
+        IMAGE_NAME="2nd-fusion" \
         IMAGE_TAG="latest" \
         VARIANT="Silverblue"
 
