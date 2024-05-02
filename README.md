@@ -17,11 +17,11 @@ Usage
 
 1. Rebase to an unsigned image to get proper signing keys:
 
-       rpm-ostree rebase ostree-unverified-registry:ghcr.io/aguslr/bluefusion:latest && systemctl reboot
+       rpm-ostree rebase ostree-unverified-registry:ghcr.io/ny5re/2nd-fusion:latest && systemctl reboot
 
 2. Rebase to a signed image to finish the installation:
 
-       rpm-ostree rebase ostree-image-signed:docker://ghcr.io/aguslr/bluefusion:latest && systemctl reboot
+       rpm-ostree rebase ostree-image-signed:docker://ghcr.io/ny5re/2nd-fusion:latest && systemctl reboot
 
 Alternatively, an [ISO file for offline installation][8] can be generated with
 the following command:
