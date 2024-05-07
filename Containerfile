@@ -16,8 +16,8 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
     rpm-ostree override remove libavfilter-free libavformat-free libavcodec-free libavutil-free libpostproc-free libswresample-free libswscale-free --install=ffmpeg && \
     rpm-ostree install gstreamer1-plugin-libav gstreamer1-plugins-bad-free-extras gstreamer1-plugins-ugly gstreamer1-vaapi && \
 ####      QEMU     ####
-    rpm-ostree install edk2-ovmf guestfs-tools libguestfs-tools libvirt-daemon-config-network libvirt-daemon-kvm libvirt-devel && \
-    rpm-ostree install python3-libguestfs qemu-kvm virt-install virt-manager virt-top virt-viewer && \
+    rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools && \
+    rpm-ostree install libguestfs-tools python3-libguestfs virt-top libvirt-devel bridge-utils edk2-ovmf && \
 ####      QEMU     ####
 ####     ny5RE     ####
     rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules && \
