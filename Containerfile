@@ -19,6 +19,8 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
     rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools && \
     rpm-ostree install libguestfs-tools python3-libguestfs virt-top libvirt-devel edk2-ovmf && \
     rpm-ostree install tuned && \
+    systemctl enable tuned && \
+    tuned-adm profile virtual-host && \
 ####      QEMU     ####
 ####     ny5RE     ####
     rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules && \
