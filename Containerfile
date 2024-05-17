@@ -23,7 +23,7 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
     tuned-adm profile virtual-host && \
 ####      QEMU     ####
 ####     ny5RE     ####
-    rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules && \
+    rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules fastfetch && \
     rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
     systemctl enable swtpm-workaround.service && \
 ####   ny5RE end   ####
