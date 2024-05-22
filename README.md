@@ -1,7 +1,9 @@
 [BlueFusion][1]
 ===============
 
-[![build-image](https://github.com/aguslr/bluefusion/actions/workflows/build.yml/badge.svg)](https://github.com/aguslr/bluefusion/actions/workflows/build.yml)
+[![build-image](https://github.com/ny5RE/silverfusion/actions/workflows/build.yml/badge.svg)](https://github.com/ny5RE/silverfusion/actions/workflows/build.yml)
+
+> **Note** I am using [this fix](https://universal-blue.discourse.group/t/selinux-workarounds-for-binaries-with-the-wrong-label/342) for libvirt.
 
 A Fedora Silverblue image that adds RPM Fusion with media codecs and replaces
 [Toolbox][2] with [Distrobox][3].
@@ -17,11 +19,11 @@ Usage
 
 1. Rebase to an unsigned image to get proper signing keys:
 
-       rpm-ostree rebase ostree-unverified-registry:ghcr.io/aguslr/bluefusion:latest && systemctl reboot
+       rpm-ostree rebase ostree-unverified-registry:ghcr.io/ny5re/2nd-fusion:latest && systemctl reboot
 
 2. Rebase to a signed image to finish the installation:
 
-       rpm-ostree rebase ostree-image-signed:docker://ghcr.io/aguslr/bluefusion:latest && systemctl reboot
+       rpm-ostree rebase ostree-image-signed:docker://ghcr.io/ny5re/2nd-fusion:latest && systemctl reboot
 
 Alternatively, an [ISO file for offline installation][8] can be generated with
 the following command:
@@ -30,8 +32,8 @@ the following command:
         --volume .:/build-container-installer/build \
         --security-opt label=disable --pull=newer \
         ghcr.io/jasonn3/build-container-installer:latest \
-        IMAGE_REPO="ghcr.io/aguslr" \
-        IMAGE_NAME="bluefusion" \
+        IMAGE_REPO="ghcr.io/ny5re" \
+        IMAGE_NAME="2nd-fusion" \
         IMAGE_TAG="latest" \
         VARIANT="Silverblue"
 
