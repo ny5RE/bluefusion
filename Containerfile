@@ -13,18 +13,6 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
         --uninstall rpmfusion-nonfree-release && \
     rpm-ostree install steam-devices && \
     rpm-ostree install intel-media-driver libva-intel-driver && \
-####      QEMU     ####
-    rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools && \
-    rpm-ostree install libguestfs-tools python3-libguestfs virt-top libvirt-devel edk2-ovmf && \
-    rpm-ostree install tuned && \
-    systemctl enable tuned.service && \
-    tuned-adm profile virtual-host && \
-####      QEMU     ####
-####     ny5RE     ####
-    rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules fastfetch && \
-    rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
-    systemctl enable swtpm-workaround.service && \
-####   ny5RE end   ####
     rpm-ostree override remove \
         mesa-va-drivers \
         ffmpeg-free \
@@ -43,5 +31,17 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
         --install=gstreamer1-plugins-bad-free-extras \
         --install=gstreamer1-plugins-ugly \
         --install=gstreamer1-vaapi && \
+####      QEMU     ####
+    rpm-ostree install virt-install libvirt-daemon-config-network libvirt-daemon-kvm qemu-kvm virt-manager virt-viewer guestfs-tools && \
+    rpm-ostree install libguestfs-tools python3-libguestfs virt-top libvirt-devel edk2-ovmf && \
+    rpm-ostree install tuned && \
+    systemctl enable tuned.service && \
+    tuned-adm profile virtual-host && \
+####      QEMU     ####
+####     ny5RE     ####
+    rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules fastfetch && \
+    rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
+    systemctl enable swtpm-workaround.service && \
+####   ny5RE end   ####
     rpm-ostree cleanup -m && \
     ostree container commit
