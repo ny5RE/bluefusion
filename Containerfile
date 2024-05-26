@@ -37,11 +37,11 @@ RUN rpm-ostree override remove toolbox --install distrobox && \
     rpm-ostree install tuned && \
     systemctl enable tuned.service && \
     tuned-adm profile virtual-host && \
+    systemctl enable swtpm-workaround.service && \
 ####      QEMU     ####
 ####     ny5RE     ####
     rpm-ostree install ffmpeg-libs ffmpegthumbnailer libva-utils openrgb-udev-rules fastfetch && \
     rpm-ostree override remove firefox firefox-langpacks gnome-tour yelp gnome-color-manager && \
-    systemctl enable swtpm-workaround.service && \
 ####   ny5RE end   ####
     rpm-ostree cleanup -m && \
     ostree container commit
